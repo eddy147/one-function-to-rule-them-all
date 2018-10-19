@@ -50,22 +50,47 @@
   (insert-helper sorted-seq [] n))
 
 (defn insertion-sort [a-seq]
-  [:-])
+  (reduce insert nil a-seq))
+
+(defn toggle [a-set elem]
+  (if (contains? a-set elem) (disj a-set elem) (conj a-set elem)))
 
 (defn parity [a-seq]
-  [:-])
+  (loop [res #{}
+         seq a-seq]
+    (if (empty? seq) res
+        (recur (toggle res (first seq)) (rest seq)))))
 
-(defn minus [x]
-  :-)
+(defn minus
+  ([x] (- x))
+  ([x y] (- x y)))
 
-(defn count-params [x]
-  :-)
+(defn count-params
+  ([] 0)
+  ([p1 & more] (+ 1 (count more))))
 
-(defn my-* [x]
-  :-)
+(defn my-*
+  ([] 1)
+  ([x] x)
+  ([x y] (* x y))
+  ([x y & more]
+   (reduce my-* (my-* x y) more)))
 
-(defn pred-and [x]
-  (fn [x] :-))
+(defn andp [& fns]
+  (fn [& args]
+    (every? #(apply % args) fns)))
 
-(defn my-map [f a-seq]
-  [:-])
+(defn pred-and
+  ([] (fn [x] true))
+  ([x] x)
+  ([x y] (andp x y))
+  ([x y & more]
+   (reduce pred-and (pred-and x y) more)))
+
+(defn my-map
+  ([f coll] (seq (reduce #(conj %1 (f %2)) [] coll)))
+  ([f coll & colls]
+   (let [colls (cons coll colls)]
+     (my-map (partial apply f)
+             (partition (count colls)
+                        (apply interleave colls))))))
